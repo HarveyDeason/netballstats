@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>Join your team</title>
+  <style>
+    :root { --bg: #f6f7fb; --ink: #14213d; --muted: #5b6475; --accent: #0f766e; --card: #ffffff; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0f1420; --ink: #eef1f7; --muted: #a3acbd; --accent: #2dd4bf; --card: #1a2131; } }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 480px; margin: 0 auto; padding: 32px 16px 48px; }
+    h1 { font-size: 30px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 32px 0 4px; }
+    p { margin: 8px 0; }
+    .button { display: block; margin: 20px 0; padding: 16px; border-radius: 14px; background: var(--accent); color: #fff;
+              text-align: center; font-weight: 800; text-decoration: none; font-size: 18px; }
+    .code { background: var(--card); border-radius: 14px; padding: 16px; text-align: center; font-size: 30px;
+            font-weight: 900; letter-spacing: 4px; }
+    .small { color: var(--muted); font-size: 14px; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Join your team</h1>
+    <p id="lead">Opening Netball Live Stats…</p>
+    <a id="open" class="button" href="netballstats://join">Open the app</a>
+    <section id="code-box" hidden>
+      <p>Or open the app, tap “Joining a team?” and type this code:</p>
+      <p id="code" class="code"></p>
+    </section>
+    <h2>Don’t have the app yet?</h2>
+    <p>Netball Live Stats isn’t in the app stores yet. Ask your coach for the install link.</p>
+    <p class="small">This page doesn’t show the team or send your code anywhere: the code stays on your phone.</p>
+  </main>
+  <script>
+    (function () {
+      // The code comes after # so it never reaches a server log.
+      var raw = (location.hash || '').slice(1);
+      try { raw = decodeURIComponent(raw); } catch (e) { /* keep it as it is */ }
+      var code = raw.toUpperCase().replace(/[^0-9A-Z]/g, '');
+      var lead = document.getElementById('lead');
+      var open = document.getElementById('open');
+      if (!/^[2-9A-HJKMNP-Z]{10}$/.test(code)) {
+        lead.textContent = 'This link is missing its code. Ask your coach to send it again.';
+        open.hidden = true;
+        return;
+      }
+      var link = 'netballstats://join?code=' + code;
+      open.href = link;
+      document.getElementById('code').textContent = code.slice(0, 5) + ' ' + code.slice(5);
+      document.getElementById('code-box').hidden = false;
+      lead.textContent = 'If the app doesn’t open by itself, tap the button.';
+      setTimeout(function () { location.href = link; }, 300);
+    })();
+  </script>
+</body>
+</html>
