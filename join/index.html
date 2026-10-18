@@ -32,11 +32,18 @@
       <p>Or open the app, tap “I’m joining a team” and type this code:</p>
       <p id="code" class="code"></p>
     </section>
-    <h2>Don’t have the app yet?</h2>
-    <p>Netball Live Stats isn’t in the app stores yet. Ask your coach for the install link.</p>
+    <section id="iphone" hidden>
+      <p>On an iPhone the team opens in Safari. Once it has opened, tap Share, then <b>Add to Home Screen</b>, so it opens like an app next time.</p>
+    </section>
+    <section id="android-help">
+      <h2>Don’t have the app yet?</h2>
+      <p>Netball Live Stats isn’t in the app stores yet. Ask your coach for the install link.</p>
+    </section>
     <p class="small">This page doesn’t show the team or send your code anywhere: the code stays on your phone.</p>
   </main>
   <script>
+    // Where the web version lives (iPhones use it until the app is in the App Store).
+    var WEB_APP = 'https://netballstats.expo.app';
     (function () {
       // The code comes after # so it never reaches a server log.
       var raw = (location.hash || '').slice(1);
@@ -49,10 +56,20 @@
         open.hidden = true;
         return;
       }
-      var link = 'netballstats://join?code=' + code;
-      open.href = link;
       document.getElementById('code').textContent = code.slice(0, 5) + ' ' + code.slice(5);
       document.getElementById('code-box').hidden = false;
+      var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (ios) {
+        // No app to open on an iPhone yet: the web version, with the code after #.
+        open.href = WEB_APP + '/join#' + code;
+        open.textContent = 'Open your team';
+        lead.textContent = 'Tap the button to see your team.';
+        document.getElementById('iphone').hidden = false;
+        document.getElementById('android-help').hidden = true;
+        return;
+      }
+      var link = 'netballstats://join?code=' + code;
+      open.href = link;
       lead.textContent = 'If the app doesn’t open by itself, tap the button.';
       setTimeout(function () { location.href = link; }, 300);
     })();
