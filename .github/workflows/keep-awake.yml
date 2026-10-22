@@ -1,0 +1,32 @@
+# Keeps the team server (Supabase free plan) from pausing in a quiet week.
+# Lives in the public `netballstats` repository as .github/workflows/keep-awake.yml
+# (setup: docs/team-server.md in the app's project). It calls ping() three
+# times a day with the publishable key, which is public by design; both values
+# are repository secrets only so they don't sit in this file.
+# A failed run (the server paused, or the secrets are wrong) emails you.
+name: Keep the team server awake
+
+on:
+  schedule:
+    - cron: '23 */8 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping the team server
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          reply=$(curl --silent --show-error --fail-with-body --retry 3 --retry-all-errors --max-time 30 \
+            -X POST "${SUPABASE_URL%/}/rest/v1/rpc/ping" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          echo "Team server says: $reply"
+          test "$reply" = '"awake"'
